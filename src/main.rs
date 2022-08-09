@@ -12,8 +12,8 @@ const HEIGHT: usize = 360;
 
 
 struct DrawingWindow {
-    window : Window,
-    surface: DrawSurface,
+	window : Window,
+	surface: DrawSurface,
 	objects : Vec<Rc<RefCell<dyn Shape>>>,
 	observers : Vec<Weak<RefCell<dyn Observer>>>,
 }
@@ -30,42 +30,42 @@ impl Rect {
 
 #[derive(Clone, Copy)]
 struct Point {
-    x : usize,
-    y : usize,
+	x : usize,
+	y : usize,
 }
 
 #[derive(Clone, Copy)]
 struct Position {
-    left : usize,
-    top : usize,
+	left : usize,
+	top : usize,
 }
 
 
 trait PositionFrom<T> {
-    fn new(t : T) -> Position;
+	fn new(t : T) -> Position;
 }
 
 impl PositionFrom<Point> for Position {
-    fn new(pos : Point) -> Self {
-        Position {
-            left : pos.x,
-            top: pos.y
-        }
-    }
+	fn new(pos : Point) -> Self {
+		Position {
+			left : pos.x,
+			top: pos.y
+		}
+	}
 }
 
 impl PositionFrom<(usize, usize)> for Position {
-    fn new(pos : (usize, usize)) -> Self {
-        Position {
-            left : pos.0,
-            top: pos.1
-        }
-    }
+	fn new(pos : (usize, usize)) -> Self {
+		Position {
+			left : pos.0,
+			top: pos.1
+		}
+	}
 }
 
 
 trait Shape {
-    fn draw(&self, surface: &mut DrawSurface);
+	fn draw(&self, surface: &mut DrawSurface);
 	fn set_position(&mut self, pos: Position);
 	fn set_color(&mut self, color : u32);
 	fn get_area(&self) -> &DrawingArea;
@@ -74,8 +74,8 @@ trait Shape {
 
 
 struct DrawingArea {
-    position : Position,
-    area : Rect,
+	position : Position,
+	area : Rect,
 }
 
 impl DrawingArea {
@@ -91,8 +91,8 @@ impl DrawingArea {
 
 struct Reactangle {
 	area : DrawingArea,
-    position : Position,
-    size : Rect,
+	position : Position,
+	size : Rect,
 	color : u32,
 }
 
@@ -102,15 +102,15 @@ impl Reactangle {
 		self.size = size;
 	}
 
-	
+
 	fn new(pos: Position, size : Rect, color : Option<u32>) -> Self {
-        Reactangle {
-            position : pos,
-            size,
+		Reactangle {
+			position : pos,
+			size,
 			color : color.unwrap_or(0xFFFFFF),
 			area : DrawingArea { position: pos, area: size }
-        }
-    }
+		}
+	}
 }
 
 
@@ -130,13 +130,13 @@ impl Shape for Reactangle {
 		self.position = pos;
 	}
 
-    fn draw(&self, surface: &mut DrawSurface) {
+	fn draw(&self, surface: &mut DrawSurface) {
 
 		let size = surface.get_size();
-        let buffer = surface.get_buffer();
+		let buffer = surface.get_buffer();
 		
 
-        let mut bounds = (0, 0);
+		let mut bounds = (0, 0);
 
 		let top = self.position.top;
 		let left = self.position.left;
@@ -148,25 +148,25 @@ impl Shape for Reactangle {
 			self.size.x + top 
 		};
 
-        bounds.1 = if self.size.y + left >= size.y {
-            size.y + left
-        }
-        else { 
-            self.size.y + left
-        };
+		bounds.1 = if self.size.y + left >= size.y {
+			size.y + left
+		}
+		else { 
+			self.size.y + left
+		};
 		
-        for i in top..bounds.0  {
-            for j in left..bounds.1 {
-                buffer[size.x * i + j] = self.color;
-            }
-        }
+		for i in top..bounds.0  {
+			for j in left..bounds.1 {
+				buffer[size.x * i + j] = self.color;
+			}
+		}
 		
-    }
+	}
 }
 
 fn from_u8_rgb(r: u8, g: u8, b: u8) -> u32 {
-    let (r, g, b) = (r as u32, g as u32, b as u32);
-    (r << 16) | (g << 8) | b
+	let (r, g, b) = (r as u32, g as u32, b as u32);
+	(r << 16) | (g << 8) | b
 }
 
 
@@ -178,48 +178,46 @@ impl DrawingWindow {
 
 	}
 
-    pub fn new(title : String, rect: Rect, options : WindowOptions) -> Self {
-        let surface = DrawSurface::new(rect);
+	pub fn new(title : String, rect: Rect, options : WindowOptions) -> Self {
+		let surface = DrawSurface::new(rect);
 
-        let mut window = Window::new(
-            title.as_str(),
-            rect.x,
-            rect.y,
-            options,
-        )
-            .unwrap_or_else(|e| {
-                panic!("{}", e);
+		let mut window = Window::new(
+			title.as_str(),
+			rect.x,
+			rect.y,
+			options,
+			)
+			.unwrap_or_else(|e| {
+				panic!("{}", e);
 		});
 
-        window.limit_update_rate(Some(std::time::Duration::from_millis(10)));
+		window.limit_update_rate(Some(std::time::Duration::from_millis(10)));
 		
-        DrawingWindow { window, surface, objects : vec![], observers : vec![] }
-    }
+		DrawingWindow { window, surface, objects : vec![], observers : vec![] }
+	}
 	
-    pub fn run(&mut self) {
+	pub fn run(&mut self) {
 
-		
-    	while self.window.is_open() && !self.window.is_key_down(Key::Escape) {
-			
-			
+		while self.window.is_open() && !self.window.is_key_down(Key::Escape) {
+
 			for object in &self.objects {
 				object.borrow_mut().draw(&mut self.surface);
 			}
 
 			self.notify();
-            let mut buffer = self.surface.get_buffer();
+			let mut buffer = self.surface.get_buffer();
 
-			
-            self.window
-                .update_with_buffer(&buffer, WIDTH, HEIGHT)
-                .unwrap();
+
+			self.window
+				.update_with_buffer(&buffer, WIDTH, HEIGHT)
+				.unwrap();
 
 			for i in buffer.iter_mut() {
 				*i = 0;
 			}
-        }
+		}
 
-    }
+	}
 
 }
 
@@ -234,16 +232,16 @@ impl Observer for TestObserver {
 }
 
 trait Observable {
-    fn add_observer(&mut self, o : Weak<RefCell<dyn Observer>>);
-    fn remove_observer(&mut self, o : Weak<RefCell<dyn Observer>>);
-    fn notify(&self);
+	fn add_observer(&mut self, o : Weak<RefCell<dyn Observer>>);
+	fn remove_observer(&mut self, o : Weak<RefCell<dyn Observer>>);
+	fn notify(&self);
 }
 
 
 
 struct DrawSurface {
-    buffer: Vec<u32>,
-    size: Rect,
+	buffer: Vec<u32>,
+	size: Rect,
 	
 }
 
@@ -274,29 +272,29 @@ impl Observable for DrawingWindow {
 
 impl DrawSurface {
 
-    pub fn new(rect: Rect) -> Self {
+	pub fn new(rect: Rect) -> Self {
 
-        let buffer = vec![0; rect.x * rect.y];
-        DrawSurface {buffer, size: rect }
-    }
+		let buffer = vec![0; rect.x * rect.y];
+		DrawSurface {buffer, size: rect }
+	}
 
-    pub fn get_buffer(&mut self) -> &mut Vec<u32> {
-        &mut self.buffer
-    }
+	pub fn get_buffer(&mut self) -> &mut Vec<u32> {
+		&mut self.buffer
+	}
 
-    pub fn get_size(&self) -> Rect {
-        self.size
-    }
+	pub fn get_size(&self) -> Rect {
+		self.size
+	}
 }
 
 
 fn main() {
 
-    let mut window = DrawingWindow::new(
-        "BETA EPTA".to_string(),
-        Rect::new(WIDTH,HEIGHT),
-        WindowOptions::default(),
-    );
+	let mut window = DrawingWindow::new(
+		"BETA EPTA".to_string(),
+		Rect::new(WIDTH,HEIGHT),
+		WindowOptions::default(),
+	);
 
 
 	for i in 0..10 {
@@ -316,7 +314,7 @@ fn main() {
 		obs.push(ob);
 	}
 
-    window.run();
+	window.run();
 
 
 }

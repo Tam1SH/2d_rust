@@ -428,7 +428,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "simple_2dlib_rust"
+name = "simple2d_rust"
 version = "0.1.0"
 dependencies = [
  "minifb",

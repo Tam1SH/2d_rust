@@ -3,13 +3,6 @@
 version = 3
 
 [[package]]
-name = "2d_rust"
-version = "0.1.0"
-dependencies = [
- "minifb",
-]
-
-[[package]]
 name = "autocfg"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -432,6 +425,13 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "simple_2dlib_rust"
+version = "0.1.0"
+dependencies = [
+ "minifb",
 ]
 
 [[package]]

@@ -1,5 +1,5 @@
 [package]
-name = "2d_rust"
+name = "simple_2dlib_rust"
 version = "0.1.0"
 edition = "2021"
 

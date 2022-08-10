@@ -57,7 +57,7 @@ impl DrawingWindow {
 			}
 
 			self.notify();
-			let mut buffer = self.surface.get_buffer();
+			let buffer = self.surface.get_buffer();
 
 
 			self.window
@@ -84,18 +84,17 @@ impl ObservableWindow for DrawingWindow {
 	fn remove_observer(&mut self, o : Weak<RefCell<dyn UpdateWindowObserver>>) {
 		self.observers.iter()
 			.position(|x| x.ptr_eq(&o))
-			.and_then(|index| Some({
+			.map(|index| {
 				self.observers.remove(index);
-			})).unwrap();
-		
+			});
 	}
 
 	fn notify(&self) {
 		for o in &self.observers {
 			let o = o.upgrade();
-			o.and_then(|o| Some({
+			o.map(|o| {
 				o.borrow_mut().on_update();
-			})).unwrap();
+			});
 		}
 	}
 }

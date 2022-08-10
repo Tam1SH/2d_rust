@@ -8,7 +8,7 @@ mod shape;
 mod update_window_observer;
 mod point;
 mod drawing_window;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 use std::cell::RefCell;
 
 use drawing_window::{ObservableWindow, DrawingWindow};
@@ -46,14 +46,16 @@ fn main() {
 	for i in 0..10 {
 			let rect = Rc::new(RefCell::new(
 				Rectangle::new(
-					Position::new(Point { x : 20, y : i * 10}), 
+					Position::new(Point { x : 20 * i, y : i * 10}), 
 					Rect::new(10, 10),
 					Option::Some(0x11FF00)
 				)));
 			
 		window.add_object(rect);
 	}
+
 	let mut obs = vec![];
+
 	for _ in 0..5 {
 		let ob: Rc<RefCell<dyn UpdateWindowObserver>> = Rc::new(RefCell::new(TestObserver{}));
 		window.add_observer(Rc::downgrade(&ob));
@@ -62,5 +64,8 @@ fn main() {
 
 	window.run();
 
+	for i in 0..5 {
+		window.remove_observer(Rc::downgrade(&obs[i]));
+	}
 
 }

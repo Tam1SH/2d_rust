@@ -25,6 +25,10 @@ pub trait ObservableWindow {
 
 impl DrawingWindow {
 
+	pub fn get_screen_size(&self) -> Rect {
+		let size = self.window.get_size();
+		Rect { x : size.0, y : size.1 }
+	}
 	pub fn add_object(&mut self, object : Rc<RefCell<dyn Shape>>) {
 		self.objects.push(object.clone());
 

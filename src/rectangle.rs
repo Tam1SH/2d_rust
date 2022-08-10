@@ -39,8 +39,8 @@ impl Shape for Rectangle {
 		let drawing_area = surface.get_size();
 		let buffer = surface.get_buffer();
 		
-		self.area.draw(drawing_area, buffer, &|pixel : &mut u32, x: usize, y: usize | {
-			*pixel = self.color;
+		self.area.draw(drawing_area, buffer, &|ref_pixel, x, y | {
+			*ref_pixel = self.color;
 		});
 		
 	}

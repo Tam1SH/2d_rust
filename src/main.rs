@@ -42,8 +42,8 @@ fn main() {
 		WindowOptions::default(),
 	);
 
-
-	for i in 0..10 {
+	let size = window.get_screen_size();
+	for i in 0..35 {
 			let rect = Rc::new(RefCell::new(
 				Rectangle::new(
 					Position::new(Point { x : 20 * i, y : i * 10}), 
@@ -52,20 +52,29 @@ fn main() {
 				)));
 			
 		window.add_object(rect);
+
+		let rect = Rc::new(RefCell::new(
+			Rectangle::new(
+				Position::new(Point { x : size.x as isize - 20 * i, y : i * 10}), 
+				Rect::new(10, 10),
+				Option::Some(0xFFFF00)
+			)));
+		
+		window.add_object(rect);
+
 	}
 
 	let mut obs = vec![];
 
-	for _ in 0..5 {
-		let ob: Rc<RefCell<dyn UpdateWindowObserver>> = Rc::new(RefCell::new(TestObserver{}));
-		window.add_observer(Rc::downgrade(&ob));
-		obs.push(ob);
-	}
+
+	let ob: Rc<RefCell<dyn UpdateWindowObserver>> = Rc::new(RefCell::new(TestObserver{}));
+	window.add_observer(Rc::downgrade(&ob));
+	obs.push(ob);
 
 	window.run();
 
-	for i in 0..5 {
-		window.remove_observer(Rc::downgrade(&obs[i]));
+	for ob in obs {
+		window.remove_observer(Rc::downgrade(&ob));
 	}
 
 }

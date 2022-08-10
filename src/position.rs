@@ -5,8 +5,8 @@ use crate::point::Point;
 
 #[derive(Clone, Copy)]
 pub struct Position {
-	pub left : usize,
-	pub top : usize,
+	pub left : isize,
+	pub top : isize,
 }
 
 
@@ -23,8 +23,8 @@ impl PositionFrom<Point> for Position {
 	}
 }
 
-impl PositionFrom<(usize, usize)> for Position {
-	fn new(pos : (usize, usize)) -> Self {
+impl PositionFrom<(isize, isize)> for Position {
+	fn new(pos : (isize, isize)) -> Self {
 		Position {
 			left : pos.0,
 			top: pos.1

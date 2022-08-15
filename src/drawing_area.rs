@@ -1,5 +1,8 @@
+use std::cell::{RefCell, Cell};
+
+use crate::draw_surface::DrawSurface;
 use crate::point::Point;
-use crate::position::{Position, self};
+use crate::position::Position;
 use crate::rect::Rect;
 
 pub struct DrawingArea {
@@ -16,32 +19,30 @@ impl DrawingArea {
 		
 	}
 	pub fn get_right_bottom(&self) -> Point {
-		
 		self.right_bottom
 	}
 	
-	pub fn draw(&self, drawing_area : Rect, buffer : &mut Vec<u32>, f: &dyn Fn(&mut u32,usize,usize) -> ()) {
+	pub fn draw(&self, drawing_area : Rect, draw_surface : &mut DrawSurface, f: &dyn Fn(usize,usize,usize) -> u32) {
 		let bounds = self.calc_bounds(drawing_area);
-		let x = if self.left_top.x < 0 {
-			0
-		}
-		else {
-			self.left_top.x as usize
-		};
-		let y = if self.left_top.y < 0 {
-			0
-		}
-		else {
-			self.left_top.y as usize
-		};
+
+		let x = if self.left_top.x < 0 {0}
+		else { self.left_top.x as usize };
+		
+		let y = if self.left_top.y < 0 {0}
+		else { self.left_top.y as usize };
 
 		let left_top = Rect {x, y};
-		//println!("bounds({}, {})", bounds.x, bounds.y);
-		//println!("left_top({}, {})", self.left_top.x, self.left_top.y);
+
+
+		let (buffer, _) = draw_surface.get_buffers_mut();
 
 		for i in left_top.y..bounds.y  {
 			for j in left_top.x..bounds.x {
-				f(&mut buffer[drawing_area.x * i + j], j, i);
+				//indexes[drawing_area.x * i + j];
+				// if(indexes[drawing_area.x * i + j] > self.position.z as u32) {
+
+				// }
+				buffer[drawing_area.x * i + j] = f(0, j, i);
 			}
 		}
 	}

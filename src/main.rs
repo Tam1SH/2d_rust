@@ -17,6 +17,7 @@ use position::{PositionFrom, Position};
 use minifb::WindowOptions;
 use rect::Rect;
 use rectangle::Rectangle;
+use shape::Shape;
 use update_window_observer::UpdateWindowObserver;
 
 
@@ -27,12 +28,14 @@ fn from_u8_rgb(r: u8, g: u8, b: u8) -> u32 {
 	(r << 16) | (g << 8) | b
 }
 
-
 struct TestObserver;
 
 impl UpdateWindowObserver for TestObserver {
-	fn on_update(&mut self) { }
+	fn on_update(&mut self) {
+		
+	}
 }
+
 
 fn main() {
 
@@ -41,40 +44,73 @@ fn main() {
 		Rect::new(640,360),
 		WindowOptions::default(),
 	);
-
+	
 	let size = window.get_screen_size();
+	let mut vec = vec![];
+
 	for i in 0..35 {
 			let rect = Rc::new(RefCell::new(
 				Rectangle::new(
 					Position::new(Point { x : 20 * i, y : i * 10}), 
 					Rect::new(10, 10),
-					Option::Some(0x11FF00)
-				)));
+					Option::Some(0xFF)
+			)));
 			
-		window.add_object(rect);
-
+		window.add_object(rect.clone());
+		vec.push(rect);
 		let rect = Rc::new(RefCell::new(
 			Rectangle::new(
 				Position::new(Point { x : size.x as isize - 20 * i, y : i * 10}), 
 				Rect::new(10, 10),
-				Option::Some(0xFFFF00)
+				Option::Some(0x11)
 			)));
 		
-		window.add_object(rect);
-
+		window.add_object(rect.clone());
+		vec.push(rect);
 	}
 
-	let mut obs = vec![];
-
-
-	let ob: Rc<RefCell<dyn UpdateWindowObserver>> = Rc::new(RefCell::new(TestObserver{}));
-	window.add_observer(Rc::downgrade(&ob));
-	obs.push(ob);
-
+	window.on_draw(Box::new(move |surface| {
+		let vec = vec.clone();
+		for obj in vec.iter() {
+			let mut obj = obj.borrow_mut();
+			let mut pos = obj.get_position();
+			pos.left += 1;
+			obj.set_position(pos);
+		}
+		let vec = vec![
+			Point { 
+				x : 10,
+				y : 10,
+			},
+			Point { 
+				x : 11,
+				y : 10,
+			},
+			Point { 
+				x : 12,
+				y : 10,
+			},
+			Point { 
+				x : 13,
+				y : 10,
+			},
+			Point { 
+				x : 14,
+				y : 10,
+			},
+			Point { 
+				x : 15,
+				y : 10,
+			},
+			Point { 
+				x : 16,
+				y : 10,
+			},
+		];
+		for p in &vec {
+			surface.set_pixel(0xFFFFFF, p.x, p.y);
+		}
+	}));
 	window.run();
-
-	for ob in obs {
-		window.remove_observer(Rc::downgrade(&ob));
-	}
 
 }

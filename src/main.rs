@@ -7,6 +7,7 @@ mod rect;
 mod shape;
 mod update_window_observer;
 mod point;
+mod ellipse;
 mod drawing_window;
 use std::rc::{Rc, Weak};
 use std::cell::RefCell;
@@ -19,6 +20,8 @@ use rect::Rect;
 use rectangle::Rectangle;
 use shape::Shape;
 use update_window_observer::UpdateWindowObserver;
+
+use crate::ellipse::Ellipse;
 
 
 
@@ -39,6 +42,12 @@ impl UpdateWindowObserver for TestObserver {
 
 fn main() {
 
+	let mut vec = vec![1, 1, 1, 1, 1, 1];
+	let slice = vec![2, 2, 2];
+	
+	vec.splice(1..3, slice.iter().cloned());
+	println!("{:?}", vec);
+
 	let mut window = DrawingWindow::new(
 		"BETA EPTA".to_string(),
 		Rect::new(640,360),
@@ -46,70 +55,30 @@ fn main() {
 	);
 	
 	let size = window.get_screen_size();
-	let mut vec = vec![];
+	let mut vec: Vec<Rc<RefCell<dyn Shape>>> = vec![];
 
-	for i in 0..35 {
-			let rect = Rc::new(RefCell::new(
-				Rectangle::new(
-					Position::new(Point { x : 20 * i, y : i * 10}), 
-					Rect::new(10, 10),
-					Option::Some(0xFF)
-			)));
-			
-		window.add_object(rect.clone());
-		vec.push(rect);
-		let rect = Rc::new(RefCell::new(
-			Rectangle::new(
-				Position::new(Point { x : size.x as isize - 20 * i, y : i * 10}), 
-				Rect::new(10, 10),
-				Option::Some(0x11)
-			)));
-		
-		window.add_object(rect.clone());
-		vec.push(rect);
+	for i in 0..1 {
+
+		let ell = Rc::new(RefCell::new(
+			Ellipse::new(
+				Position::new(Point { x : 100, y : 100}), 
+				Rect::new(50, 50),
+				Option::Some(0xFF)
+			)
+		));
+		window.add_object(ell.clone());
+		vec.push(ell);
 	}
 
 	window.on_draw(Box::new(move |surface| {
 		let vec = vec.clone();
 		for obj in vec.iter() {
 			let mut obj = obj.borrow_mut();
-			let mut pos = obj.get_position();
-			pos.left += 1;
-			obj.set_position(pos);
+			//let mut pos = obj.get_position();
+			//pos.left += 1;
+			//obj.set_position(pos);
 		}
-		let vec = vec![
-			Point { 
-				x : 10,
-				y : 10,
-			},
-			Point { 
-				x : 11,
-				y : 10,
-			},
-			Point { 
-				x : 12,
-				y : 10,
-			},
-			Point { 
-				x : 13,
-				y : 10,
-			},
-			Point { 
-				x : 14,
-				y : 10,
-			},
-			Point { 
-				x : 15,
-				y : 10,
-			},
-			Point { 
-				x : 16,
-				y : 10,
-			},
-		];
-		for p in &vec {
-			surface.set_pixel(0xFFFFFF, p.x, p.y);
-		}
+
 	}));
 	window.run();
 

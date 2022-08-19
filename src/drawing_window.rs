@@ -7,20 +7,18 @@ use std::cell::RefCell;
 use crate::draw_surface::DrawSurface;
 use crate::rect::Rect;
 use crate::shape::Shape;
-use crate::update_window_observer::UpdateWindowObserver;
 
 pub struct DrawingWindow {
 	window : Window,
 	surface: DrawSurface,
 	objects : Vec<Rc<RefCell<dyn Shape>>>,
-	observers : Vec<Weak<RefCell<dyn UpdateWindowObserver>>>,
+	observers : Vec<Box<dyn Fn(&mut DrawSurface)>>,
 }
 
 
 pub trait ObservableWindow {
-	fn add_observer(&mut self, o : Weak<RefCell<dyn UpdateWindowObserver>>);
-	fn remove_observer(&mut self, o : Weak<RefCell<dyn UpdateWindowObserver>>);
-	fn notify(&self);
+	fn on_draw(&mut self, o : Box<dyn Fn(&mut DrawSurface)>);
+	fn update(&mut self);
 }
 
 impl DrawingWindow {
@@ -29,10 +27,12 @@ impl DrawingWindow {
 		let size = self.window.get_size();
 		Rect { x : size.0, y : size.1 }
 	}
+
 	pub fn add_object(&mut self, object : Rc<RefCell<dyn Shape>>) {
 		self.objects.push(object.clone());
 
 	}
+
 
 	pub fn new(title : String, rect: Rect, options : WindowOptions) -> Self {
 		let surface = DrawSurface::new(rect);
@@ -47,7 +47,7 @@ impl DrawingWindow {
 				panic!("{}", e);
 		});
 		
-		window.limit_update_rate(Some(std::time::Duration::from_millis(10)));
+		window.limit_update_rate(Some(std::time::Duration::from_millis(16)));
 		
 		DrawingWindow { window, surface, objects : vec![], observers : vec![] }
 	}
@@ -60,9 +60,9 @@ impl DrawingWindow {
 				object.borrow_mut().draw(&mut self.surface);
 			}
 
-			self.notify();
-			let buffer = self.surface.get_buffer();
-
+			self.update();
+			
+			let buffer = self.surface.get_buffer_mut();
 
 			self.window
 				.update_with_buffer(&buffer, 
@@ -73,6 +73,7 @@ impl DrawingWindow {
 			for i in buffer.iter_mut() {
 				*i = 0;
 			}
+
 		}
 
 	}
@@ -81,24 +82,13 @@ impl DrawingWindow {
 
 impl ObservableWindow for DrawingWindow {
 
-	fn add_observer(&mut self, o : Weak<RefCell<dyn UpdateWindowObserver>>) {
+	fn on_draw(&mut self, o : Box<dyn Fn(&mut DrawSurface)>) {
 		self.observers.push(o);
 	}
 
-	fn remove_observer(&mut self, o : Weak<RefCell<dyn UpdateWindowObserver>>) {
-		self.observers.iter()
-			.position(|x| x.ptr_eq(&o))
-			.map(|index| {
-				self.observers.remove(index);
-			});
-	}
-
-	fn notify(&self) {
+	fn update(&mut self) {
 		for o in &self.observers {
-			let o = o.upgrade();
-			o.map(|o| {
-				o.borrow_mut().on_update();
-			});
+			o(&mut self.surface);
 		}
 	}
 }

@@ -11,40 +11,93 @@ pub struct DrawingArea {
 	left_top : Point,
 	right_bottom : Point,
 }
-
+pub enum Positioning {
+	Relative, Absolute
+}
 impl DrawingArea {
 
-	pub fn get_left_top(&self) -> Point {
-		self.left_top
-		
-	}
-	pub fn get_right_bottom(&self) -> Point {
-		self.right_bottom
+	pub fn get_left_top(&self, positioning : Positioning) -> Point {
+		match positioning {
+			Positioning::Absolute => self.left_top,
+			Positioning::Relative => {
+				Point {
+					x : self.left_top.x - self.position.left,
+					y : self.left_top.y - self.position.top ,
+				}
+			},
+		}
 	}
 	
-	pub fn draw(&self, drawing_area : Rect, draw_surface : &mut DrawSurface, f: &dyn Fn(usize,usize,usize) -> u32) {
+	
+	pub fn get_right_bottom(&self, positioning : Positioning) -> Point {
+		match positioning {
+			Positioning::Absolute => self.right_bottom,
+			Positioning::Relative => {
+				Point {
+					x : self.right_bottom.x - self.position.left,
+					y : self.right_bottom.y - self.position.top,
+				}
+			},
+		}
+	}
+
+
+	fn _draw_with_once<T>(&self, drawing_area : Rect, f1 : T) 
+	where T : FnOnce(Rect, Rect) {
+
 		let bounds = self.calc_bounds(drawing_area);
+		let point = self.get_left_top(Positioning::Absolute);
+		let left_top = Rect::from_point(point);
 
-		let x = if self.left_top.x < 0 {0}
-		else { self.left_top.x as usize };
-		
-		let y = if self.left_top.y < 0 {0}
-		else { self.left_top.y as usize };
+		f1(left_top, bounds);
+	}
+	
+	fn _draw<T>(&self, drawing_area : Rect, f: &mut T) where T : FnMut(usize,usize) {
 
-		let left_top = Rect {x, y};
-
-
-		let (buffer, _) = draw_surface.get_buffers_mut();
+		let bounds = self.calc_bounds(drawing_area);
+		let left_top = Rect::from_point(self.get_left_top(Positioning::Absolute));
 
 		for i in left_top.y..bounds.y  {
 			for j in left_top.x..bounds.x {
-				//indexes[drawing_area.x * i + j];
-				// if(indexes[drawing_area.x * i + j] > self.position.z as u32) {
-
-				// }
-				buffer[drawing_area.x * i + j] = f(0, j, i);
+				f(i, j);
 			}
 		}
+	}
+	
+	pub fn draw_from_buffer(&self, drawing_area : Rect, draw_surface : &mut DrawSurface, buffer : &Vec<u32>) {
+
+		let (_buffer, _) = draw_surface.get_buffers_mut();
+		let self_area = self.get_area();
+		let f = |left_top: Rect, right_bottom: Rect| { 
+
+			for i in left_top.y..right_bottom.y  {
+				for j in left_top.x..right_bottom.x {
+					_buffer[drawing_area.x * i + j] = buffer[self_area.x * (i - left_top.y) + (j - left_top.x)];
+				}
+			}
+		};
+
+		self._draw_with_once(drawing_area, f);
+
+		
+	}
+
+	pub fn draw<T>(&self, drawing_area : Rect, draw_surface : &mut DrawSurface, f: &T)
+	where T : Fn(Rect, Rect, usize, usize, usize) -> Option<u32> {
+
+		let (buffer, _) = draw_surface.get_buffers_mut();
+		let left_top = Rect::from_point(self.get_left_top(Positioning::Absolute));
+		let right_bottom = Rect::from_point(self.get_right_bottom(Positioning::Absolute));
+
+		let mut f1 = |i: usize, j: usize| { 
+			
+			match f(left_top, right_bottom, 0, j, i) {
+				Some(value) => buffer[drawing_area.x * i + j] = value,
+				None => return,
+			}
+		};
+
+		self._draw(drawing_area, &mut f1);
 	}
 	
 

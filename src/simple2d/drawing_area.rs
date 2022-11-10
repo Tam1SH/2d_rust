@@ -1,9 +1,4 @@
-use std::cell::{RefCell, Cell};
-
-use crate::draw_surface::DrawSurface;
-use crate::point::Point;
-use crate::position::Position;
-use crate::rect::Rect;
+use super::{position::Position, rect::Rect, point::Point, draw_surface::DrawSurface};
 
 pub struct DrawingArea {
 	position : Position,
@@ -67,6 +62,7 @@ impl DrawingArea {
 	pub fn draw_from_buffer(&self, drawing_area : Rect, draw_surface : &mut DrawSurface, buffer : &Vec<u32>) {
 
 		let (_buffer, _) = draw_surface.get_buffers_mut();
+
 		let self_area = self.get_area();
 		let f = |left_top: Rect, right_bottom: Rect| { 
 

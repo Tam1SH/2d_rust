@@ -1,4 +1,4 @@
-use crate::{draw_surface::DrawSurface, position::Position, drawing_area::DrawingArea, point::Point};
+use super::{draw_surface::DrawSurface, point::Point, position::Position, drawing_area::DrawingArea};
 
 
 pub trait Shape {
@@ -10,4 +10,3 @@ pub trait Shape {
 	fn get_color(&self) -> u32;
 	fn get_area(&self) -> &DrawingArea;
 }
-	

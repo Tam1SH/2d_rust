@@ -1,7 +1,5 @@
 use std::ops;
-
-use crate::point::Point;
-
+use super::point::Point;
 #[derive(Clone, Copy)]
 pub struct Rect {
 	pub x : usize,
@@ -25,12 +23,12 @@ impl ops::Add<Rect> for Rect {
 
 	type Output = Rect;
 
-    fn add(self, rhs: Rect) -> Self::Output {
-        Rect { 
-            x: self.x + rhs.x,
-            y: self.y + rhs.y,		
+	fn add(self, rhs: Rect) -> Self::Output {
+		Rect { 
+			x: self.x + rhs.x,
+			y: self.y + rhs.y,		
 		}
-    }
+	}
 
 }
 impl ops::Sub<Rect> for Rect { 

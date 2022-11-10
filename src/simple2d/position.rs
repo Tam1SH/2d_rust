@@ -1,9 +1,5 @@
 use std::ops;
-
-use crate::point::Point;
-
-
-
+use super::point::Point;
 
 #[derive(Clone, Copy)]
 pub struct Position {

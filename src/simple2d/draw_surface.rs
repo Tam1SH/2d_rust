@@ -1,6 +1,4 @@
-use std::cell::Cell;
-
-use crate::rect::Rect;
+use super::rect::Rect;
 
 pub struct DrawSurface {
 	buffers : (Vec<u32>, Vec<u32>),
@@ -62,4 +60,5 @@ impl DrawSurface {
 	pub fn get_size(&self) -> Rect {
 		self.size
 	}
+
 }

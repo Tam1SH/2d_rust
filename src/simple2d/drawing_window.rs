@@ -1,25 +1,21 @@
 extern crate minifb;
 
 use minifb::{Key, Window, WindowOptions};
-use std::rc::{Rc, Weak};
+use std::rc::Rc;
 use std::cell::RefCell;
 
-use crate::draw_surface::DrawSurface;
-use crate::rect::Rect;
-use crate::shape::Shape;
+use super::draw_surface::DrawSurface;
+use super::rect::Rect;
+use super::shape::Shape;
+
 
 pub struct DrawingWindow {
 	window : Window,
 	surface: DrawSurface,
 	objects : Vec<Rc<RefCell<dyn Shape>>>,
-	observers : Vec<Box<dyn Fn(&mut DrawSurface)>>,
+	observers : Vec<Rc<Box<dyn Fn(&mut DrawSurface)>>>,
 }
 
-
-pub trait ObservableWindow {
-	fn on_draw(&mut self, o : Box<dyn Fn(&mut DrawSurface)>);
-	fn update(&mut self);
-}
 
 impl DrawingWindow {
 
@@ -78,18 +74,18 @@ impl DrawingWindow {
 
 	}
 
-}
-
-impl ObservableWindow for DrawingWindow {
-
-	fn on_draw(&mut self, o : Box<dyn Fn(&mut DrawSurface)>) {
-		self.observers.push(o);
+	pub fn subscribe_on_draw<'a>(&mut self, o : Rc<Box<dyn Fn(&mut DrawSurface)>>) {
+		self.observers.push(o.clone());
+	}
+	pub fn unsubscribe_on_draw(&mut self, o : Rc<Box<dyn Fn(&mut DrawSurface)>>) {
+		let index = self.observers.iter().position(|x| Rc::ptr_eq(x, &o)).unwrap();
+		self.observers.remove(index);
 	}
 
-	fn update(&mut self) {
+	pub fn update(&mut self) {
 		for o in &self.observers {
 			o(&mut self.surface);
 		}
 	}
-}
 
+}

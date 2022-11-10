@@ -1,5 +1,9 @@
-use crate::{drawing_area::DrawingArea, rect::Rect, position::{Position, PositionFrom}, shape::Shape, draw_surface::DrawSurface, point::Point};
-
+use super::draw_surface::DrawSurface;
+use super::point::Point;
+use super::position::{Position, PositionFrom};
+use super::rect::Rect;
+use super::shape::Shape;
+use super::drawing_area::DrawingArea;
 
 pub struct Rectangle {
 	area : DrawingArea,
@@ -53,4 +57,3 @@ impl Shape for Rectangle {
 		
 	}
 }
-

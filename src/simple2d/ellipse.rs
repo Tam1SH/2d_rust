@@ -1,9 +1,16 @@
-use crate::{drawing_area::{DrawingArea, Positioning}, rect::Rect, position::{Position, PositionFrom}, shape::Shape, draw_surface::DrawSurface, point::Point};
+
+use super::{draw_surface::DrawSurface, 
+	point::Point, 
+	position::{Position, PositionFrom}, 
+	rect::Rect, 
+	shape::Shape, 
+	drawing_area::{DrawingArea, Positioning}};
 
 pub struct Ellipse {
 	area : DrawingArea,
 	color : u32,
 }
+
 impl Ellipse {
 
 	pub fn new(pos: Position, size : Rect, color : Option<u32>) -> Self {
@@ -15,7 +22,8 @@ impl Ellipse {
 }
 
 impl Shape for Ellipse {
- 	fn draw(&self, surface: &mut DrawSurface) {
+
+	fn draw(&self, surface: &mut DrawSurface) {
 
 		let rect = self.area.get_right_bottom(Positioning::Relative);
 		let (width, height) = (rect.x, rect.y);
@@ -24,7 +32,7 @@ impl Shape for Ellipse {
 			for x in -width..width {
 				if x*x*height*height+y*y*width*width <= height*height*width*width {
 					let pos = self.get_position();
-					surface.set_pixel(0xFF11, pos.left + x, pos.top + y);
+					surface.set_pixel(self.color, pos.left + x, pos.top + y);
 				}
 			}
 		}
